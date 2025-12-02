@@ -5,6 +5,8 @@ import menu2 from './images/menu2.jpg';
 
 export default function Products() {
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [touchStart, setTouchStart] = React.useState(null);
+  const [touchEnd, setTouchEnd] = React.useState(null);
 
   const products = [
     {
@@ -27,6 +29,33 @@ export default function Products() {
 
   const prevCard = () => {
     setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
+  };
+
+  // Minimum swipe distance
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextCard();
+    }
+    if (isRightSwipe) {
+      prevCard();
+    }
   };
 
   const getCardStyle = (index) => {
@@ -57,29 +86,34 @@ export default function Products() {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-[1000px]">
-      {/* Left Button */}
+    <div className="relative flex items-center justify-center min-h-[600px] py-12">
+      {/* Left Button - Hidden on mobile */}
       <button
         onClick={prevCard}
-        className="absolute left-[152px] z-10 p-4 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+        className="hidden md:block absolute left-[152px] z-10 p-4 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
       >
         <ChevronLeft size={32} />
       </button>
 
       {/* Cards Stack */}
-      <div className="relative w-full max-w-2xl h-[900px]">
+      <div 
+        className="relative w-full max-w-2xl h-[500px] md:h-[900px]"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {products.map((product, index) => (
           <div
             key={product.id}
             className="absolute inset-0 bg-white rounded-2xl shadow-2xl transition-all duration-500 ease-in-out overflow-hidden"
             style={getCardStyle(index)}
           >
-            <div className="w-full h-full p-8">
+            <div className="w-full h-full p-4 md:p-8">
               <div className="w-full h-full bg-gray-200 rounded-lg overflow-hidden">
                 <img 
                   src={product.image} 
                   alt={product.name} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.parentElement.style.backgroundColor = '#f3f4f6';
@@ -91,16 +125,16 @@ export default function Products() {
         ))}
       </div>
 
-      {/* Right Button */}
+      {/* Right Button - Hidden on mobile */}
       <button
         onClick={nextCard}
-        className="absolute right-[152px] z-10 p-4 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+        className="hidden md:block absolute right-[152px] z-10 p-4 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
       >
         <ChevronRight size={32} />
       </button>
 
       {/* Indicator dots */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
         {products.map((_, index) => (
           <div
             key={index}
