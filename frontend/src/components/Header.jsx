@@ -2,9 +2,11 @@ import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import logo from './images/mscpfp.jpg';
+import MenuModal from './MenuModal';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [menuModalOpen, setMenuModalOpen] = React.useState(false);
   const [scrollY, setScrollY] = React.useState(0);
   const location = useLocation();
   const navigate = useNavigate();
@@ -74,9 +76,9 @@ export default function Header() {
               <button onClick={() => scrollToSection('projects')} className="text-sm font-semibold text-white hover:text-white/70 transition-colors uppercase tracking-wide">
                 Gallery
               </button>
-              <a href="/menu" className="text-sm font-semibold text-white hover:text-white/70 transition-colors uppercase tracking-wide">
+              <button onClick={() => setMenuModalOpen(true)} className="text-sm font-semibold text-white hover:text-white/70 transition-colors uppercase tracking-wide">
                 Menu
-              </a>
+              </button>
               <button onClick={() => scrollToSection('location')} className="text-sm font-semibold text-white hover:text-white/70 transition-colors uppercase tracking-wide">
                 Contact
               </button>
@@ -113,9 +115,9 @@ export default function Header() {
               <button onClick={() => scrollToSection('projects')} className="text-left text-sm font-semibold text-white hover:opacity-70 transition-opacity">
                 Gallery
               </button>
-              <a href="/menu" className="text-left text-sm font-semibold text-white hover:opacity-70 transition-opacity">
+              <button onClick={() => { setMenuModalOpen(true); setIsMenuOpen(false); }} className="text-left text-sm font-semibold text-white hover:opacity-70 transition-opacity">
                 Menu
-              </a>
+              </button>
               <button onClick={() => scrollToSection('location')} className="text-left text-sm font-semibold text-white hover:opacity-70 transition-opacity">
                 Contact
               </button>
@@ -123,6 +125,7 @@ export default function Header() {
           )}
         </div>
       </header>
+      <MenuModal isOpen={menuModalOpen} onClose={() => setMenuModalOpen(false)} />
     </>
   );
 }
