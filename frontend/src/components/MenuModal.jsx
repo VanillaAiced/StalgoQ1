@@ -54,15 +54,52 @@ import oats from './images/oats.jpg';
 
 export default function MenuModal({ isOpen, onClose }) {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
-  const [products, setProducts] = React.useState([]);
+  const [ratings, setRatings] = React.useState({});
+  const [userRatings, setUserRatings] = React.useState({});
   
   React.useEffect(() => {
     async function fetchProducts() {
       const {data} = await axios.get('http://127.0.0.1:8000/api/products/')
-      setProducts(data)
+      
+      // Initialize ratings from backend data
+      const initialRatings = {};
+      data.forEach(product => {
+        initialRatings[product._id] = {
+          rating: product.rating,
+          numReviews: product.numReviews
+        };
+      });
+      setRatings(initialRatings);
     }
     fetchProducts()
   }, [])
+  
+  const handleRating = async (productId, ratingValue) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/products/${productId}/rate/`,
+        { rating: ratingValue }
+      );
+      
+      // Update local ratings
+      setRatings(prev => ({
+        ...prev,
+        [productId]: {
+          rating: response.data.rating,
+          numReviews: response.data.numReviews
+        }
+      }));
+      
+      // Track user's rating for this product
+      setUserRatings(prev => ({
+        ...prev,
+        [productId]: ratingValue
+      }));
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      alert('Failed to submit rating. Please try again.');
+    }
+  };
   
   if (!isOpen) return null;
 
@@ -70,120 +107,120 @@ export default function MenuModal({ isOpen, onClose }) {
     {
       name: 'SANDWICH',
       items: [
-        { name: 'Cheesy Ham', price: '140', image: cheesyham },
-        { name: 'Cheesy Meat', price: '140', image: cheesymeat },
+        { id: '1', name: 'Cheesy Ham', price: '140', image: cheesyham },
+        { id: '2', name: 'Cheesy Meat', price: '140', image: cheesymeat },
       ]
     },
     {
       name: 'CHICKEN FINGERS',
       items: [
-        { name: 'Double Cheese', price: '160', image: doublecheesechick},
-        { name: 'Glazed Teriyaki', price: '160', image: teri },
+        { id: '3', name: 'Double Cheese', price: '160', image: doublecheesechick},
+        { id: '4', name: 'Glazed Teriyaki', price: '160', image: teri },
       ]
     },
     {
       name: 'FRIES',
       items: [
-        { name: 'Barbecue', price: '75', image: bar },
-        { name: 'Cheese', price: '75', image: cheese },
-        { name: 'Sour Cream', price: '75', image: sc },
+        { id: 'fries1', name: 'Barbecue', price: '75', image: bar },
+        { id: 'fries2', name: 'Cheese', price: '75', image: cheese },
+        { id: 'fries3', name: 'Sour Cream', price: '75', image: sc },
       ]
     },
     {
       name: 'CROFFLES',
       items: [
-        { name: 'Chocolate Oreo', price: '145', image: oreo },
-        { name: 'Cinnamon Biscoff', price: '145', image: biscoff },
-        { name: 'Mango Graham', price: '145', image: mango },
-        { name: 'Salted Caramel', price: '145', image: saltcarm },
-        { name: 'Strawberry', price: '145', image: strawberry },
+        { id: 'croffle1', name: 'Chocolate Oreo', price: '145', image: oreo },
+        { id: 'croffle2', name: 'Cinnamon Biscoff', price: '145', image: biscoff },
+        { id: 'croffle3', name: 'Mango Graham', price: '145', image: mango },
+        { id: 'croffle4', name: 'Salted Caramel', price: '145', image: saltcarm },
+        { id: 'croffle5', name: 'Strawberry', price: '145', image: strawberry },
       ]
     },
     {
       name: 'CAKE',
       items: [
-        { name: 'Blueberry Cheesecake', price: '165', image: bbc },
-        { name: 'Biscoff Cheesecake', price: '175', image: biscoffcake },
+        { id: 'cake1', name: 'Blueberry Cheesecake', price: '165', image: bbc },
+        { id: 'cake2', name: 'Biscoff Cheesecake', price: '175', image: biscoffcake },
       ]
     },
     {
       name: 'COOKIES',
       items: [
-        { name: 'Chocolate Chip', price: '85', image: cc },
-        { name: 'Double Chocolate', price: '100', image: dcc },
-        { name: "S'mores", price: '100', image: smores },
-        { name: 'Red Velvet', price: '115', image: rev },
+        { id: 'cookie1', name: 'Chocolate Chip', price: '85', image: cc },
+        { id: 'cookie2', name: 'Double Chocolate', price: '100', image: dcc },
+        { id: 'cookie3', name: "S'mores", price: '100', image: smores },
+        { id: 'cookie4', name: 'Red Velvet', price: '115', image: rev },
       ]
     },
     {
       name: 'SIGNATURE',
       items: [
-        { name: 'Caramel Macchiato', description: 'espresso, caramel, milk', price: 'Hot 145 / Iced 140', image: carmm },
-        { name: 'Spanish Latte', description: 'espresso, condensed milk, milk', price: 'Hot 155 / Iced 150', image: spanish },
-        { name: 'Sea Salt Latte', description: 'espresso, sea salt breve', price: 'Iced 160', image: seasalt },
-        { name: 'Mocha Breve', description: 'espresso, chocolate, breve', price: 'Iced 160', image: breve },
-        { name: 'Dirty Cinnamon Biscoff', description: 'espresso, biscoff breve, cinnamon', price: 'Iced 170', image: dirtycb },
-        { name: 'Dirty Matcha', description: 'espresso, matcha, milk', price: 'Hot 175 / Iced 170', image: dirtymatcha },
+        { id: '5', name: 'Caramel Macchiato', description: 'espresso, caramel, milk', price: 'Hot 145 / Iced 140', image: carmm },
+        { id: '6', name: 'Spanish Latte', description: 'espresso, condensed milk, milk', price: 'Hot 155 / Iced 150', image: spanish },
+        { id: 'sig3', name: 'Sea Salt Latte', description: 'espresso, sea salt breve', price: 'Iced 160', image: seasalt },
+        { id: 'sig4', name: 'Mocha Breve', description: 'espresso, chocolate, breve', price: 'Iced 160', image: breve },
+        { id: 'sig5', name: 'Dirty Cinnamon Biscoff', description: 'espresso, biscoff breve, cinnamon', price: 'Iced 170', image: dirtycb },
+        { id: 'sig6', name: 'Dirty Matcha', description: 'espresso, matcha, milk', price: 'Hot 175 / Iced 170', image: dirtymatcha },
       ]
     },
     {
       name: 'TRADITIONAL',
       items: [
-        { name: 'Long Black', price: 'Hot 95', image: longblack },
-        { name: 'Honey Americano', price: 'Hot 90 / Iced 100', image: honeyame },
-        { name: 'Latte', price: 'Hot 100 / Iced 110', image: latte },
-        { name: 'Cappuccino', price: 'Hot 100' , image: capp },
-        { name: 'Mocha', price: 'Hot 115', image: mocha},
+        { id: 'trad1', name: 'Long Black', price: 'Hot 95', image: longblack },
+        { id: 'trad2', name: 'Honey Americano', price: 'Hot 90 / Iced 100', image: honeyame },
+        { id: 'trad3', name: 'Latte', price: 'Hot 100 / Iced 110', image: latte },
+        { id: 'trad4', name: 'Cappuccino', price: 'Hot 100' , image: capp },
+        { id: 'trad5', name: 'Mocha', price: 'Hot 115', image: mocha},
       ]
     },
     {
       name: 'NON-COFFEE',
       items: [
-        { name: 'Choco Rush', description: 'chocolate, breve', price: '130', image: rush },
-        { name: 'Midnight Matcha', description: 'matcha, milk', price: '160', image: midnight },
-        { name: 'Cinnamon Honeybear', description: 'cinnamon, honey, milk', price: '160', image: honeycin },
-        { name: 'Milo Dinosaur', description: 'chocolate milo, milk', price: '160', image: milod },
-        { name: 'Cinnamon Biscoff', description: 'biscoff breve, cinnamon', price: '170', image: biss },
+        { id: 'noncoffee1', name: 'Choco Rush', description: 'chocolate, breve', price: '130', image: rush },
+        { id: 'noncoffee2', name: 'Midnight Matcha', description: 'matcha, milk', price: '160', image: midnight },
+        { id: 'noncoffee3', name: 'Cinnamon Honeybear', description: 'cinnamon, honey, milk', price: '160', image: honeycin },
+        { id: 'noncoffee4', name: 'Milo Dinosaur', description: 'chocolate milo, milk', price: '160', image: milod },
+        { id: 'noncoffee5', name: 'Cinnamon Biscoff', description: 'biscoff breve, cinnamon', price: '170', image: biss },
       ]
     },
     {
       name: 'FRAPPE',
       items: [
-        { name: 'Java Chip', price: 'w/ Coffee 160 / Iced 170', image: java },
-        { name: 'Caramel Popcorn', price: 'w/ Coffee 160 / Iced 170', image: carmfrap },
-        { name: 'White Mocha', price: 'w/ Coffee 160 / Iced 170', image: whitemocha },
+        { id: 'frappe1', name: 'Java Chip', price: 'w/ Coffee 160 / Iced 170', image: java },
+        { id: 'frappe2', name: 'Caramel Popcorn', price: 'w/ Coffee 160 / Iced 170', image: carmfrap },
+        { id: 'frappe3', name: 'White Mocha', price: 'w/ Coffee 160 / Iced 170', image: whitemocha },
       ]
     },
     {
       name: 'YOGURT SMOOTHIE',
       items: [
-        { name: 'Lychee Yogurt', price: '160', image: lychee },
-        { name: 'Mango Yogurt', price: '160', image: mangoy },
-        { name: 'Strawberry Yogurt', price: '160', image: strawy },
+        { id: 'yogurt1', name: 'Lychee Yogurt', price: '160', image: lychee },
+        { id: 'yogurt2', name: 'Mango Yogurt', price: '160', image: mangoy },
+        { id: 'yogurt3', name: 'Strawberry Yogurt', price: '160', image: strawy },
       ]
     },
     {
       name: 'FIZZY DRINK',
       items: [
-        { name: 'Green Apple Tonic', price: '115', image: green },
-        { name: 'Mango Tonic', price: '115', image: mangofizz },
-        { name: 'Strawberry Tonic', price: '115', image: strawberryfizz },
+        { id: 'fizzy1', name: 'Green Apple Tonic', price: '115', image: green },
+        { id: 'fizzy2', name: 'Mango Tonic', price: '115', image: mangofizz },
+        { id: 'fizzy3', name: 'Strawberry Tonic', price: '115', image: strawberryfizz },
       ]
     },
     {
       name: 'REFRESHERS',
       items: [
-        { name: 'Green Apple Lemonade', price: '110', image: gal },
-        { name: 'Mango Lemonade', price: '110', image: ml },
-        { name: 'Strawberry Lemonade', price: '110', image: sl },
+        { id: 'refresh1', name: 'Green Apple Lemonade', price: '110', image: gal },
+        { id: 'refresh2', name: 'Mango Lemonade', price: '110', image: ml },
+        { id: 'refresh3', name: 'Strawberry Lemonade', price: '110', image: sl },
       ]
     },
     {
       name: 'ADD-ONS',
       items: [
-        { name: 'Syrup Pump', price: '15', image: pump },
-        { name: 'Espresso 1 Shot', price: '30', image: shot },
-        { name: 'Oat Milk / Sub Out', price: '30', image: oats },
+        { id: 'addon1', name: 'Syrup Pump', price: '15', image: pump },
+        { id: 'addon2', name: 'Espresso 1 Shot', price: '30', image: shot },
+        { id: 'addon3', name: 'Oat Milk / Sub Out', price: '30', image: oats },
       ]
     }
   ];
@@ -256,51 +293,91 @@ export default function MenuModal({ isOpen, onClose }) {
               </h1>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                {selectedCategory.items.map((item) => (
-                  <div key={item.name} className="rounded-lg overflow-hidden shadow-xl" style={{ backgroundColor: '#0C2039' }}>
-                    {/* Food image */}
-                    <div className="h-64 bg-gray-700 overflow-hidden">
-                      <img 
-                        src={item.image || '/images/food/placeholder.jpg'} 
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                      <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center" style={{display: 'none'}}>
-                        <span className="text-white/50 text-6xl">🍽️</span>
-                      </div>
-                    </div>
-                    
-                    <div className="p-6 text-white">
-                      <h3 className="text-2xl font-bold mb-3">{item.name}</h3>
-                      {item.description && (
-                        <p className="text-sm text-white/70 italic mb-4">{item.description}</p>
-                      )}
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-3xl font-bold">₱{item.price}</span>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className="text-yellow-400 text-xl">★</span>
-                          ))}
+                {selectedCategory.items.map((item) => {
+                  const itemRating = ratings[item.id] || { rating: 0, numReviews: 0 };
+                  const userRating = userRatings[item.id] || 0;
+                  
+                  return (
+                    <div key={item.name} className="rounded-lg overflow-hidden shadow-xl" style={{ backgroundColor: '#0C2039' }}>
+                      {/* Food image */}
+                      <div className="h-64 bg-gray-700 overflow-hidden">
+                        <img 
+                          src={item.image || '/images/food/placeholder.jpg'} 
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center" style={{display: 'none'}}>
+                          <span className="text-white/50 text-6xl">🍽️</span>
                         </div>
                       </div>
                       
-                      <button 
-                        className="w-full py-3 bg-white text-[#0C2039] font-bold rounded-lg hover:bg-gray-100 transition-colors text-lg"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          alert(`Added ${item.name} to cart!`);
-                        }}
-                      >
-                        Add to Order
-                      </button>
+                      <div className="p-6 text-white">
+                        <h3 className="text-2xl font-bold mb-3">{item.name}</h3>
+                        {item.description && (
+                          <p className="text-sm text-white/70 italic mb-4">{item.description}</p>
+                        )}
+                        
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-3xl font-bold">₱{item.price}</span>
+                        </div>
+                        
+                        {/* Display average rating */}
+                        <div className="mb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <span 
+                                  key={i} 
+                                  className={`text-xl ${i < Math.round(itemRating.rating) ? 'text-yellow-400' : 'text-gray-500'}`}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-sm text-white/70">
+                              {itemRating.rating > 0 ? itemRating.rating.toFixed(1) : 'No ratings'} 
+                              {itemRating.numReviews > 0 && ` (${itemRating.numReviews} ${itemRating.numReviews === 1 ? 'review' : 'reviews'})`}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Rate this item */}
+                        <div className="mb-4 border-t border-white/20 pt-3">
+                          <p className="text-sm text-white/70 mb-2">
+                            {userRating > 0 ? 'Your rating:' : 'Rate this item:'}
+                          </p>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                onClick={() => handleRating(item.id, star)}
+                                className="text-2xl hover:scale-110 transition-transform focus:outline-none"
+                              >
+                                <span className={star <= userRating ? 'text-yellow-400' : 'text-gray-500'}>
+                                  ★
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <button 
+                          className="w-full py-3 bg-white text-[#0C2039] font-bold rounded-lg hover:bg-gray-100 transition-colors text-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert(`Added ${item.name} to cart!`);
+                          }}
+                        >
+                          Add to Order
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
